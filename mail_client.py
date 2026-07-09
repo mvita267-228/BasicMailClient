@@ -10,6 +10,8 @@ send_email() — подключается по SMTP (SSL) и отправляе�
 которые GUI получает из database.AccountStore.get_account().
 """
 
+from __future__ import annotations
+
 import imaplib
 import smtplib
 import email
