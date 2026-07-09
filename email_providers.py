@@ -9,6 +9,8 @@
 UnsupportedProviderError, и GUI показывает отказ.
 """
 
+from __future__ import annotations
+
 
 class UnsupportedProviderError(Exception):
     """Почтовый провайдер не поддерживается (заблокирован сознательно)."""

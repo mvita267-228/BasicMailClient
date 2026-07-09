@@ -6,6 +6,8 @@
 если ключ не найден, и на сам ключ, если перевода нет вообще.
 """
 
+from __future__ import annotations
+
 TRANSLATIONS = {
     "en": {
         "window_title": "Mail Client (TinyDB, encrypted)",

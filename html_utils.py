@@ -12,6 +12,8 @@ javascript:-ссылки. Это НЕ полноценная защита от X
 bleach) — но для превью писем в личном desktop-клиенте достаточно.
 """
 
+from __future__ import annotations
+
 import html
 import re
 
