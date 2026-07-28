@@ -25,16 +25,27 @@
 
 import base64
 import json
+import os
 
 from tinydb import TinyDB, Query
 
-from crypto_utils import Cipher, generate_salt
+from crypto_utils import Cipher, generate_salt, validate_master_password, WeakPasswordError
 
-DB_PATH = "data.db"
+# Базовый путь для базы данных - используем безопасное место
+DEFAULT_DB_PATH = os.path.join(os.path.expanduser("~"), ".mail_client", "data.db")
 
 
 class AccountStore:
-    def __init__(self, db_path: str = DB_PATH):
+    def __init__(self, db_path: str | None = None):
+        # Создаём директорию если она не существует
+        if db_path is None:
+            db_path = DEFAULT_DB_PATH
+        
+        db_dir = os.path.dirname(db_path)
+        if db_dir and not os.path.exists(db_dir):
+            os.makedirs(db_dir, mode=0o700)  # Только владелец имеет доступ
+        
+        self.db_path = db_path
         self.db = TinyDB(db_path)
         self.meta_table = self.db.table("meta")
         self.accounts_table = self.db.table("accounts")
@@ -48,6 +59,9 @@ class AccountStore:
 
     def setup_master_password(self, master_password: str) -> None:
         """Вызывается один раз при первом запуске приложения."""
+        # Валидация сложности пароля
+        validate_master_password(master_password)
+        
         salt = generate_salt()
         cipher = Cipher(master_password, salt)
         check_token = cipher.make_check_token()

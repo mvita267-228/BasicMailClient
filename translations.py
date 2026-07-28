@@ -44,6 +44,7 @@ TRANSLATIONS = {
         "cancel": "Cancel",
         "password_empty": "Password cannot be empty",
         "password_mismatch": "Passwords do not match",
+        "password_requirements": "Password requirements:\n• Minimum 8 characters\n• At least one letter and one digit",
         "wrong_master_password": "Wrong master password",
         # add account dialog
         "add_account_title": "Add account",
@@ -111,6 +112,7 @@ TRANSLATIONS = {
         "cancel": "Отмена",
         "password_empty": "Пароль не может быть пустым",
         "password_mismatch": "Пароли не совпадают",
+        "password_requirements": "Требования к паролю:\n• Минимум 8 символов\n• Как минимум одна буква и одна цифра",
         "wrong_master_password": "Неверный мастер-пароль",
         # add account dialog
         "add_account_title": "Добавить аккаунт",
