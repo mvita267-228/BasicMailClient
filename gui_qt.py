@@ -147,6 +147,15 @@ class MasterPasswordDialog(QDialog):
             form.addRow(tr("repeat_label", lang), self.repeat_edit)
 
         layout.addLayout(form)
+        
+        # Добавляем подсказку о требованиях к паролю
+        if creating:
+            password_hint = QLabel(
+                tr("password_requirements", lang)
+            )
+            password_hint.setStyleSheet("color: gray; font-size: 10px;")
+            password_hint.setWordWrap(True)
+            layout.addWidget(password_hint)
 
         buttons = QHBoxLayout()
         ok_btn = QPushButton(tr("ok", lang))
@@ -163,9 +172,23 @@ class MasterPasswordDialog(QDialog):
         if not pwd:
             QMessageBox.warning(self, tr("warning_title", self.lang), tr("password_empty", self.lang))
             return
-        if self.creating and pwd != self.repeat_edit.text():
-            QMessageBox.warning(self, tr("warning_title", self.lang), tr("password_mismatch", self.lang))
-            return
+        
+        # Валидация сложности пароля при создании
+        if self.creating:
+            from crypto_utils import validate_master_password, WeakPasswordError
+            try:
+                validate_master_password(pwd)
+            except WeakPasswordError as e:
+                QMessageBox.warning(self, tr("warning_title", self.lang), str(e))
+                return
+            except ValueError as e:
+                QMessageBox.warning(self, tr("warning_title", self.lang), str(e))
+                return
+            
+            if pwd != self.repeat_edit.text():
+                QMessageBox.warning(self, tr("warning_title", self.lang), tr("password_mismatch", self.lang))
+                return
+        
         self.password = pwd
         self.accept()
 

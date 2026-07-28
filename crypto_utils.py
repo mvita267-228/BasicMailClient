@@ -15,19 +15,65 @@ HMAC для проверки целостности).
 
 import base64
 import os
+import secrets
+import hmac
 
 from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
+# Минимальная длина мастер-пароля для безопасности
+MIN_PASSWORD_LENGTH = 8
+# Максимальное количество попыток ввода мастер-пароля
+MAX_LOGIN_ATTEMPTS = 3
+# Количество итераций PBKDF2 для защиты от brute-force
 PBKDF2_ITERATIONS = 100_000
-SALT_SIZE = 16
+SALT_SIZE = 32  # Увеличено с 16 до 32 байт для лучшей безопасности
 CHECK_PLAINTEXT = b"mailclient-master-password-check"
 
 
+class MasterPasswordError(Exception):
+    """Исключение для ошибок мастер-пароля."""
+    pass
+
+
+class WeakPasswordError(MasterPasswordError):
+    """Исключение для слабых паролей."""
+    pass
+
+
 def generate_salt() -> bytes:
-    """Генерирует новую случайную соль."""
-    return os.urandom(SALT_SIZE)
+    """Генерирует новую случайную соль используя cryptographically secure генератор."""
+    return secrets.token_bytes(SALT_SIZE)
+
+
+def validate_master_password(password: str) -> None:
+    """
+    Проверяет сложность мастер-пароля.
+    
+    Args:
+        password: Мастер-пароль для проверки
+        
+    Raises:
+        WeakPasswordError: Если пароль слишком слабый
+        ValueError: Если пароль пустой
+    """
+    if not password:
+        raise ValueError("Мастер-пароль не может быть пустым")
+    
+    if len(password) < MIN_PASSWORD_LENGTH:
+        raise WeakPasswordError(
+            f"Мастер-пароль должен содержать минимум {MIN_PASSWORD_LENGTH} символов"
+        )
+    
+    # Проверка на наличие хотя бы одной цифры и одной буквы
+    has_digit = any(c.isdigit() for c in password)
+    has_alpha = any(c.isalpha() for c in password)
+    
+    if not (has_digit and has_alpha):
+        raise WeakPasswordError(
+            "Мастер-пароль должен содержать как минимум одну букву и одну цифру"
+        )
 
 
 def derive_key(master_password: str, salt: bytes) -> bytes:
